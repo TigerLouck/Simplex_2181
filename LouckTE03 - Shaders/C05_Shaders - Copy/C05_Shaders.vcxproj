@@ -11,10 +11,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{C15B09BC-570B-4098-8967-037462DFDF62}</ProjectGuid>
-    <RootNamespace>C04_ShaderCompiler</RootNamespace>
-    <ProjectName>C04_ShaderCompiler</ProjectName>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <ProjectGuid>{E60B5B2D-19E8-4FD3-BFF7-CB908C5A651A}</ProjectGuid>
+    <RootNamespace>C05_Shaders</RootNamespace>
+    <ProjectName>C05_Shaders</ProjectName>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

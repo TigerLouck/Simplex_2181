@@ -1,26 +1,5 @@
 #include "MyMesh.h"
-void MyMesh::GenerateCircle(float a_fRadius, int a_nSubdivisions, vector3 a_v3Color)
-{
-	Release();
-	Init();
 
-	if (a_fRadius < 0.01f)
-		a_fRadius = 0.01f;
-
-	if (a_nSubdivisions < 3)
-		a_nSubdivisions = 3;
-	if (a_nSubdivisions > 360)
-		a_nSubdivisions = 360;
-
-	/*
-		Calculate a_nSubdivisions number of points around a center point in a radial manner
-		then call the AddTri function to generate a_nSubdivision number of faces
-	*/
-
-	// Adding information about color
-	CompleteMesh(a_v3Color);
-	CompileOpenGL3X();
-}
 void MyMesh::Init(void)
 {
 	m_bBinded = false;
@@ -197,116 +176,58 @@ void MyMesh::AddQuad(vector3 a_vBottomLeft, vector3 a_vBottomRight, vector3 a_vT
 }
 void MyMesh::GenerateCube(float a_fSize, vector3 a_v3Color)
 {
-	if (a_fSize < 0.01f)
-		a_fSize = 0.01f;
-
 	Release();
 	Init();
 
-	float fValue = a_fSize * 0.5f;
-	//3--2
-	//|  |
-	//0--1
+	const float SIZEOVERTWO = a_fSize / 2.0f;
+	//calculate offsets of relevant points from the origin using fSize
+	//god i wish there was a better way that didn't involve hellacious math and loops that're impossible to document
+	
+	vector3 v3_NorthEastUp = vector3(SIZEOVERTWO, SIZEOVERTWO, SIZEOVERTWO);
+	vector3 v3_NorthWestUp = vector3(-SIZEOVERTWO, SIZEOVERTWO, SIZEOVERTWO);
+	vector3 v3_SouthEastUp = vector3(SIZEOVERTWO, -SIZEOVERTWO, SIZEOVERTWO);
+	vector3 v3_SouthWestUp = vector3(-SIZEOVERTWO, -SIZEOVERTWO, SIZEOVERTWO);
+	vector3 v3_NorthEastDown = vector3(SIZEOVERTWO, SIZEOVERTWO, -SIZEOVERTWO);
+	vector3 v3_NorthWestDown = vector3(-SIZEOVERTWO, SIZEOVERTWO, -SIZEOVERTWO);
+	vector3 v3_SouthEastDown = vector3(SIZEOVERTWO, -SIZEOVERTWO, -SIZEOVERTWO);
+	vector3 v3_SouthWestDown = vector3(-SIZEOVERTWO, -SIZEOVERTWO, -SIZEOVERTWO);
 
-	vector3 point0(-fValue, -fValue, fValue); //0
-	vector3 point1(fValue, -fValue, fValue); //1
-	vector3 point2(fValue, fValue, fValue); //2
-	vector3 point3(-fValue, fValue, fValue); //3
+	//now make each of the six sides
+	//this coordinate system is incorrectly labeled
+	//top
+	AddQuad(v3_NorthEastUp, v3_NorthWestUp, v3_SouthEastUp, v3_SouthWestUp);
 
-	vector3 point4(-fValue, -fValue, -fValue); //4
-	vector3 point5(fValue, -fValue, -fValue); //5
-	vector3 point6(fValue, fValue, -fValue); //6
-	vector3 point7(-fValue, fValue, -fValue); //7
+	//bottom
+	AddQuad(v3_SouthEastDown, v3_SouthWestDown, v3_NorthEastDown, v3_NorthWestDown);
 
-											  //F
-	AddQuad(point0, point1, point3, point2);
+	//front
+	AddQuad(v3_NorthEastDown, v3_NorthWestDown, v3_NorthEastUp, v3_NorthWestUp);
 
-	//B
-	AddQuad(point5, point4, point6, point7);
+	//back
+	AddQuad(v3_SouthEastUp, v3_SouthWestUp, v3_SouthEastDown, v3_SouthWestDown);
 
-	//L
-	AddQuad(point4, point0, point7, point3);
+	//right
+	AddQuad(v3_NorthEastUp, v3_SouthEastUp, v3_NorthEastDown, v3_SouthEastDown);
 
-	//R
-	AddQuad(point1, point5, point2, point6);
+	//left
+	AddQuad( v3_NorthWestDown, v3_SouthWestDown, v3_NorthWestUp, v3_SouthWestUp );
 
-	//U
-	AddQuad(point3, point2, point7, point6);
-
-	//D
-	AddQuad(point4, point5, point0, point1);
-
-	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
 }
-void MyMesh::GenerateCuboid(vector3 a_v3Dimensions, vector3 a_v3Color)
-{
-	Release();
-	Init();
 
-	vector3 v3Value = a_v3Dimensions * 0.5f;
-	//3--2
-	//|  |
-	//0--1
-	vector3 point0(-v3Value.x, -v3Value.y, v3Value.z); //0
-	vector3 point1(v3Value.x, -v3Value.y, v3Value.z); //1
-	vector3 point2(v3Value.x, v3Value.y, v3Value.z); //2
-	vector3 point3(-v3Value.x, v3Value.y, v3Value.z); //3
-
-	vector3 point4(-v3Value.x, -v3Value.y, -v3Value.z); //4
-	vector3 point5(v3Value.x, -v3Value.y, -v3Value.z); //5
-	vector3 point6(v3Value.x, v3Value.y, -v3Value.z); //6
-	vector3 point7(-v3Value.x, v3Value.y, -v3Value.z); //7
-
-													   //F
-	AddQuad(point0, point1, point3, point2);
-
-	//B
-	AddQuad(point5, point4, point6, point7);
-
-	//L
-	AddQuad(point4, point0, point7, point3);
-
-	//R
-	AddQuad(point1, point5, point2, point6);
-
-	//U
-	AddQuad(point3, point2, point7, point6);
-
-	//D
-	AddQuad(point4, point5, point0, point1);
-
-	// Adding information about color
-	CompleteMesh(a_v3Color);
-	CompileOpenGL3X();
-}
 
 void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions, vector3 a_v3Color)
 {
-	if (a_fRadius < 0.01f)
-		a_fRadius = 0.01f;
+	std::vector<vector3> radiiPts = std::vector<vector3>();
+	for (size_t i = 0; i < a_nSubdivisions; i++)
+	{
 
-	if (a_fHeight < 0.01f)
-		a_fHeight = 0.01f;
-
-	if (a_nSubdivisions < 3)
-		a_nSubdivisions = 3;
-	if (a_nSubdivisions > 360)
-		a_nSubdivisions = 360;
+	}
 
 	Release();
 	Init();
 
-	// Replace this with your code
-	Mesh* pMesh = new Mesh();
-	pMesh->GenerateCone(a_fRadius, a_fHeight, a_nSubdivisions, a_v3Color);
-	m_lVertexPos = pMesh->GetVertexList();
-	m_uVertexCount = m_lVertexPos.size();
-	SafeDelete(pMesh);
-	// -------------------------------
-
-	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
 }

@@ -145,25 +145,6 @@ public:
 	-	vector3 a_v3Color -> Color of the mesh
 	OUTPUT: ---
 	*/
-	void GenerateCuboid(vector3 a_v3Dimensions, vector3 a_v3Color = C_WHITE);
-	/*
-	USAGE: Generates a cone mesh
-	ARGUMENTS:
-	-	float a_fRadius -> radius
-	-	int a_nSubdivisions -> divisions of the cap
-	-	vector3 a_v3Color -> Color of the mesh
-	OUTPUT: ---
-	*/
-	void GenerateCircle(float a_fRadius, int a_nSubdivisions, vector3 a_v3Color = C_WHITE);
-	/*
-	USAGE: Generates a cylinder mesh
-	ARGUMENTS:
-	-	float a_fRadius -> radius
-	-	float a_fHeight -> how tall is the mesh
-	-	int a_nSubdivisions -> divisions on the cap
-	-	vector3 a_v3Color -> Color of the mesh
-	OUTPUT: ---
-	*/
 	void GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions, vector3 a_v3Color = C_WHITE);
 	/*
 	USAGE: Generates a cylinder mesh
