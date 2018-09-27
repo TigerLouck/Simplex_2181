@@ -275,9 +275,31 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	std::vector<vector3> radiiPts = std::vector<vector3>();
+	const float INCREMENT = (2 * PI) / a_nSubdivisions;
+	vector3 point = vector3(0, 0, a_fHeight);
+	vector3 poke = vector3();
+
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		radiiPts.push_back(vector3(cos(i * INCREMENT) * a_fRadius, sin(i * INCREMENT) * a_fRadius, 0));
+	}
+
+	for (int i = 0; i < radiiPts.size(); i++)
+	{
+		if (i + 1 > radiiPts.size() - 1) {
+			//make fan tri
+			AddTri(radiiPts[0], radiiPts[i], poke);
+			//make cone tri
+			AddTri(radiiPts[i], radiiPts[0], point);
+		}
+		else {
+			//make fan tri
+			AddTri(radiiPts[i + 1], radiiPts[i], poke );
+			//make cone tri
+			AddTri( radiiPts[i], radiiPts[i + 1], point);
+		}
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
@@ -299,10 +321,35 @@ void MyMesh::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisi
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
+	std::vector<vector3> radiiPts = std::vector<vector3>();
+	const float INCREMENT = (2 * PI) / a_nSubdivisions;
+	vector3 point = vector3(0, 0, a_fHeight);
+	vector3 poke = vector3();
 	// -------------------------------
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		radiiPts.push_back(vector3(cos(i * INCREMENT) * a_fRadius, sin(i * INCREMENT) * a_fRadius, 0));
+	}
 
+	for (int i = 0; i < radiiPts.size(); i++)
+	{
+		if (i + 1 > radiiPts.size() - 1) {
+			//make fan tri
+			AddTri(radiiPts[0], radiiPts[i], poke);
+			//make top fan tri
+			AddTri(radiiPts[i] + point, radiiPts[0] + point, point);
+			//make wall quad
+			AddQuad(radiiPts[i], radiiPts[0], radiiPts[i] + point, radiiPts[0] + point);
+		}
+		else {
+			//make fan tri
+			AddTri(radiiPts[i + 1], radiiPts[i], poke);
+			//make top fan tri
+			AddTri(radiiPts[i] + point, radiiPts[i + 1] + point, point);
+			//make wall quad
+			AddQuad(radiiPts[i], radiiPts[i + 1], radiiPts[i] + point, radiiPts[i + 1] + point);
+		}
+	}
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
@@ -329,10 +376,40 @@ void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fH
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	std::vector<vector3> radiiInnPts = std::vector<vector3>();
+	std::vector<vector3> radiiOutPts = std::vector<vector3>();
+	const float INCREMENT = (2 * PI) / a_nSubdivisions;
+	vector3 point = vector3(0, 0, a_fHeight);
+	vector3 poke = vector3();
 
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		radiiInnPts.push_back(vector3(cos(i * INCREMENT) * a_fInnerRadius, sin(i * INCREMENT) * a_fInnerRadius, 0));
+		radiiOutPts.push_back(vector3(cos(i * INCREMENT) * a_fOuterRadius, sin(i * INCREMENT) * a_fOuterRadius, 0));
+	}
+	for (int i = 0; i < radiiInnPts.size(); i++)
+	{
+		if (i + 1 > radiiInnPts.size() - 1) {
+			//make outer wall quad
+			AddQuad(radiiOutPts[i], radiiOutPts[0], radiiOutPts[i] + point, radiiOutPts[0] + point);
+			//make inner wall quad
+			AddQuad( radiiInnPts[0], radiiInnPts[i], radiiInnPts[0] + point, radiiInnPts[i] + point);
+			//make bottom quad
+			AddQuad(radiiInnPts[i], radiiInnPts[0], radiiOutPts[i], radiiOutPts[0]);
+			//make top quad
+			AddQuad(radiiOutPts[i] + point, radiiOutPts[0] + point, radiiInnPts[i] + point, radiiInnPts[0] + point);
+		}
+		else {
+			//make outer wall quad
+			AddQuad(radiiOutPts[i], radiiOutPts[i + 1], radiiOutPts[i] + point, radiiOutPts[i + 1] + point);
+			//make inner wall quad
+			AddQuad(radiiInnPts[i + 1], radiiInnPts[i], radiiInnPts[i + 1] + point, radiiInnPts[i] + point);
+			//make bottom quad
+			AddQuad(radiiInnPts[i], radiiInnPts[i+1], radiiOutPts[i], radiiOutPts[i+1]);
+			//make top quad
+			AddQuad(radiiOutPts[i] + point, radiiOutPts[i+1] + point, radiiInnPts[i] + point, radiiInnPts[i+1] + point);
+		}
+	}
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
@@ -387,7 +464,63 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
+	std::vector<vector3> currentRadii = std::vector<vector3>();
+	const float INCREMENT = (2 * PI) / a_nSubdivisions;
+	vector3 poke1 = vector3(0, 0, a_fRadius);
+	vector3 poke2 = vector3(0, 0, -a_fRadius);
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		currentRadii.push_back(vector3(cos(i * INCREMENT), sin(i * INCREMENT), 0));
+	}
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		if (i == 0) {
+			//generate a fan at the top
+			/*for (int j = 0; j < a_nSubdivisions; j++)
+			{
+				if (j + 1 > currentRadii.size() - 1) {
+					//make fan tri
+					AddTri((currentRadii[0] * sin(i*INCREMENT)) + (2 * poke1 * (i/a_nSubdivisions) - poke1), 
+						currentRadii[j] * sin(i*INCREMENT) + (2 * poke1 * (i / a_nSubdivisions) - poke1), 
+						poke1); //fuck yeah vector math
+				}
+				else {
+					//make fan tri
+					AddTri(currentRadii[j + 1] * sin(i*INCREMENT), currentRadii[j] * sin(i*INCREMENT), poke1);
+				}
+			}*/
+			
+			
+		}
+		else if (i == a_nSubdivisions) {
+			//generate fan at the bottom
+		}
+		else {
+			//generate walls
+			//this should work with successive rings down the plane of the sphere
+			for (int j = 0; j < a_nSubdivisions; j++)
+			{
+				if (j + 1 == currentRadii.size() ) {
+					//make last wall quad
+					AddQuad(
+						(currentRadii[0] * sin((i+1)*INCREMENT)) + (2 * poke1 * ((i + 1) / a_nSubdivisions) + poke2),
+						(currentRadii[j] * sin((i+1)*INCREMENT)) + (2 * poke1 * ((i + 1) / a_nSubdivisions) + poke2),
+						(currentRadii[0] * sin(i*INCREMENT)) + (2 * poke1 * (i / a_nSubdivisions) + poke2),
+						(currentRadii[j] * sin(i*INCREMENT)) + (2 * poke1 * (i / a_nSubdivisions) + poke2)
+					);
+				}
+				else {
+					//make wall quad
+					AddQuad(
+						(currentRadii[j+1] * sin((i+1)*INCREMENT)) + (2 * poke1 * ((i + 1) / a_nSubdivisions) + poke2),
+						(currentRadii[j] * sin((i+1)*INCREMENT)) + (2 * poke1 * ((i + 1) / a_nSubdivisions) + poke2),
+						(currentRadii[j+1] * sin((i)*INCREMENT)) + (2 * poke1 * (i / a_nSubdivisions) + poke2),
+						(currentRadii[j] * sin((i)*INCREMENT)) + (2 * poke1 * (i / a_nSubdivisions) + poke2)
+					);
+				}
+			}
+		}
+	}
 	// -------------------------------
 
 	// Adding information about color

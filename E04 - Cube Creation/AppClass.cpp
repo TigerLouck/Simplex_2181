@@ -1,10 +1,25 @@
 #include "AppClass.h"
 void Application::InitVariables(void)
 {
-	//Make MyMesh object
-	m_pMesh = new MyMesh();
-	//Generate a circle
-	m_pMesh->GenerateCube(2.0f, C_RED);
+	
+	for (size_t i = 0; i < 11; i++)
+	{
+		for (size_t j = 8; j > 0; j--)
+		{
+			if (spaceInvader[j][i] == 1)
+			{
+				//Make MyMesh object
+				m_pMesh = new MyMesh();
+				//Generate a circle
+				m_pMesh->GenerateCube(2.0f, C_BLACK);
+				matrix4 t = glm::translate(vector3(2 * i, 2 * j, 0));
+				matrix4* translation = new matrix4(t);
+				cubes.push_back(m_pMesh);
+				cubestransform.push_back(translation);
+			}
+		}
+	}
+	
 }
 void Application::Update(void)
 {
@@ -22,8 +37,12 @@ void Application::Display(void)
 	// Clear the screen
 	ClearScreen();
 
-	//Render the mesh
-	m_pMesh->Render(m_pCameraMngr->GetProjectionMatrix(), m_pCameraMngr->GetViewMatrix(), ToMatrix4(m_qArcBall));
+	//Render the meshes
+	for (size_t i = 0; i < cubes.size(); i++)
+	{
+		cubes[i]->Render(m_pCameraMngr->GetProjectionMatrix(), m_pCameraMngr->GetViewMatrix(), *cubestransform[i]);
+	}
+	//m_pMesh->Render(m_pCameraMngr->GetProjectionMatrix(), m_pCameraMngr->GetViewMatrix(), ToMatrix4(m_qArcBall));
 		
 	// draw a skybox
 	m_pMeshMngr->AddSkyboxToRenderList();

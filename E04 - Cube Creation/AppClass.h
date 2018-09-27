@@ -14,6 +14,20 @@ Date: 2017/05
 
 class Application
 {
+	int spaceInvader[8][11] = {
+		{0,0,1,0,0,0,0,0,1,0,0},
+		{0,0,0,1,0,0,0,1,0,0,0},
+		{0,0,1,1,1,1,1,1,1,0,0},
+		{0,1,1,0,1,1,1,0,1,1,0},
+		{1,1,1,1,1,1,1,1,1,1,1},
+		{1,0,1,1,1,1,1,1,1,0,1},
+		{1,0,1,0,0,0,0,0,1,0,1},
+		{0,0,1,1,0,0,0,1,1,0,0}
+	};//the disrespect on this assignment
+
+	std::vector<MyMesh*> cubes = std::vector<MyMesh*>();
+	std::vector<matrix4*> cubestransform = std::vector<matrix4*>();
+
 	MyMesh* m_pMesh = nullptr;
 
 	String m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
