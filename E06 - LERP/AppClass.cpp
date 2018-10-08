@@ -35,6 +35,7 @@ void Application::Update(void)
 	//Is the arcball active?
 	ArcBall();
 
+
 	//Is the first person camera active?
 	CameraRotation();
 }
@@ -58,8 +59,14 @@ void Application::Display(void)
 
 
 
-	//your code goes here
-	v3CurrentPos = vector3(0.0f, 0.0f, 0.0f);
+	//your code goes here	
+	v3CurrentPos = glm::lerp(m_stopsList[iLerper],m_stopsList[(iLerper + 1) % m_stopsList.size()], fTimer / ftStep);
+	if (fTimer > ftStep) {
+		fTimer = 0;
+		iLerper++;
+		if (iLerper >= m_stopsList.size()) iLerper = 0; //why does modulo not work here but does work up there
+		//why can't i have nice things
+	}
 	//-------------------
 	
 
