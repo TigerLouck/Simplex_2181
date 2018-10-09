@@ -2,12 +2,11 @@
 void Application::InitVariables(void)
 {
 	//Change this to your name and email
-	m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
+	m_sProgrammer = "Tiger Louck - txl9017";
 	
 	//Set the position and target of the camera
 	//(I'm at [0,0,10], looking at [0,0,0] and up is the positive Y axis)
 	m_pCameraMngr->SetPositionTargetAndUpward(AXIS_Z * 20.0f, ZERO_V3, AXIS_Y);
-
 	//if the light position is zero move it
 	if (m_pLightMngr->GetPosition(1) == ZERO_V3)
 		m_pLightMngr->SetPosition(vector3(0.0f, 0.0f, 3.0f));
@@ -17,6 +16,7 @@ void Application::InitVariables(void)
 	{
 		m_v4ClearColor = vector4(ZERO_V3, 1.0f);
 	}
+
 	
 	//if there are no segments create 7
 	if(m_uOrbits < 1)
@@ -64,17 +64,53 @@ void Application::Display(void)
 	*/
 	//m4Offset = glm::rotate(IDENTITY_M4, 1.5708f, AXIS_Z);
 
-	// draw a shapes
+	//timer automation
+	static uint uClock = m_pSystem->GenClock();
+	static float fTimer = 0;
+	static float fTStep = 2;
+	fTimer += m_pSystem->GetDeltaTime(uClock);
+
+	//this implementation has the spheres on the outside going faster
 	for (uint i = 0; i < m_uOrbits; ++i)
 	{
 		m_pMeshMngr->AddMeshToRenderList(m_shapeList[i], glm::rotate(m4Offset, 1.5708f, AXIS_X));
 
-		//calculate the current position
+		
+	}
+	for (uint i = 0; i < m_uOrbits; i++)
+	{
+		//modulo the local time into the fraction of the arbitrary line segment, store
+		float fLocalInterp = fmodf(fTimer, fTStep / (i + 2)) / (fTStep / (i + 2));
+
+		//figure out which line segment that is
+		int vert = static_cast<int>(floor((fmodf(fTimer, fTStep / (i + 2) * (i + 3)) / fTStep) * (i + 2)));//taking the "global" position modulus to get where it is around the circle, and then flooring to int to get the index of the point in the circle
+																					   //take modulo of time to timestep, normalize, multiply by subdivisions
+
+																					   //interpolate given sphere over given points
 		vector3 v3CurrentPos = ZERO_V3;
-		matrix4 m4Model = glm::translate(m4Offset, v3CurrentPos);
+
+		//huge pile of accessing to get the verticies i want without breaking things
+		v3CurrentPos =
+			glm::lerp(
+				m_pMeshMngr->
+				GetMesh(m_shapeList[i])->
+				GetVertexList()[(vert * 6) % m_pMeshMngr->GetMesh(m_shapeList[i])->GetVertexList().size()],
+				m_pMeshMngr->
+				GetMesh(m_shapeList[i])->
+				GetVertexList()[(vert * 6 + 1) % m_pMeshMngr->GetMesh(m_shapeList[i])->GetVertexList().size()], //come on, man
+				fLocalInterp);//function return value indexing, never had to do that before
+
+							  //transform to match tori
+		matrix4 m4Model = glm::rotate(m4Offset, 1.5708f, AXIS_X);
+		m4Model = glm::translate(m4Model, v3CurrentPos);
+		m4Model = m4Model * glm::scale(vector3(0.1));
+
+
+		//I gotta say Bobadilla you did not make this easy
+
 
 		//draw spheres
-		m_pMeshMngr->AddSphereToRenderList(m4Model * glm::scale(vector3(0.1)), C_WHITE);
+		m_pMeshMngr->AddSphereToRenderList(m4Model, C_WHITE);
 	}
 
 	//render list call
