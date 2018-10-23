@@ -12,10 +12,13 @@ Date: 2017/05
 
 class Application
 {
-	String m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
+	String m_sProgrammer = "Tiger Louck - txl9017";
 	std::vector<vector3> m_stopsList;
 	Simplex::Model* m_pModel = nullptr;
 private:
+	int iLerper = 0;
+	float ftStep = 1.0f;
+
 	static ImGuiObject gui; //GUI object
 	
 	uint m_uRenderCallCount = 0; //count of render calls per frame

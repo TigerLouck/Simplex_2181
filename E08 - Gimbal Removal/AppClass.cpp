@@ -4,7 +4,7 @@ void Application::InitVariables(void)
 	//init the mesh
 	m_pMesh = new MyMesh();
 	//m_pMesh->GenerateCube(1.0f, C_WHITE);
-	m_pMesh->GenerateCone(2.0f, 5.0f, 3, C_WHITE);
+	m_pMesh->GenerateCone(2.0f, 5.0f, 3, C_RED);
 }
 void Application::Update(void)
 {
@@ -24,6 +24,8 @@ void Application::Display(void)
 
 	matrix4 m4View = m_pCameraMngr->GetViewMatrix();
 	matrix4 m4Projection = m_pCameraMngr->GetProjectionMatrix();
+	
+	//m_v3Rotation.x++;
 
 	m_m4Model = glm::rotate(IDENTITY_M4, glm::radians(m_v3Rotation.x), vector3(1.0f, 0.0f, 0.0f));
 	m_m4Model = glm::rotate(m_m4Model, glm::radians(m_v3Rotation.y), vector3(0.0f, 1.0f, 0.0f));
