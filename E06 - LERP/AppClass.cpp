@@ -61,16 +61,24 @@ void Application::Display(void)
 
 	//your code goes here	
 	v3CurrentPos = glm::lerp(m_stopsList[iLerper],m_stopsList[(iLerper + 1) % m_stopsList.size()], fTimer / ftStep);
+<<<<<<< HEAD
 	if (fTimer >= ftStep) 
 		iLerper = (++iLerper) % m_stopsList.size();
 	fTimer = fmodf(fTimer, ftStep); //fuck off
 
 	/*if (fTimer > ftStep) {
+=======
+	if (fTimer > ftStep) {
+>>>>>>> 5ebd6064eee259e2213008f944da8781bba53404
 		fTimer = 0;
 		iLerper++;
 		if (iLerper >= m_stopsList.size()) iLerper = 0; //why does modulo not work here but does work up there
 		//why can't i have nice things
+<<<<<<< HEAD
 	}*/
+=======
+	}
+>>>>>>> 5ebd6064eee259e2213008f944da8781bba53404
 	//-------------------
 	
 

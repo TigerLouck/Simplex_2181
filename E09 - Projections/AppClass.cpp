@@ -39,6 +39,7 @@ void Application::Update(void)
 }
 void Application::Display(void)
 {
+	static uint lastProj = 0;
 	//Clear the screen
 	ClearScreen();
 	
@@ -46,31 +47,43 @@ void Application::Display(void)
 	m_pMeshMngr->AddSkyboxToRenderList();
 
 	//calculate view and projection
-	switch (m_uProjection)
+	if (lastProj != m_uProjection)
 	{
-	default:
-	case 1:
-		m_pCamera->ResetCamera();
-		break;
-	case 2:
-		m_pCamera->ResetCamera();
-		break;
-	case 3:
-		m_pCamera->ResetCamera();
-		break;
-	case 4:
-		m_pCamera->ResetCamera();
-		break;
-	case 5:
-		m_pCamera->ResetCamera();
-		break;
-	case 6:
-		m_pCamera->ResetCamera();
-		break;
-	case 7:
-		m_pCamera->ResetCamera();
-		break;
+		switch (m_uProjection)
+		{
+		default:
+			m_pCamera->ResetCamera();
+			break;
+		case 1:
+			m_pCamera->SetPerspective(false);
+			break;
+		case 2:
+			m_pCamera->ResetCamera();
+			m_pCamera->SetPositionTargetAndUpward(vector3(20.0f,0.0f,0.0f),ZERO_V3,vector3(0.0f,0.0f, -1.0f)); //is this what i'm supposed to be doing? i have no idea
+			break; //there's no accessible view matrix or view matrix setter, calculate has no args, render args aren't encapsulated into variables which makes that unlikely, so i'm left with this.
+		case 3:
+			m_pCamera->ResetCamera();
+			m_pCamera->SetPositionTargetAndUpward(vector3(0.0f, 0.0f,-15.0f), ZERO_V3, vector3(0.0f, 1.0f, 0.0f ));
+			break;
+		case 4:
+			m_pCamera->ResetCamera();
+			m_pCamera->SetPositionTargetAndUpward(vector3(0.0f, 0.0f, -10.0f), ZERO_V3, vector3(0.0f, 1.0f, 0.0f));
+			break;
+		case 5:
+			m_pCamera->ResetCamera();
+			m_pCamera->SetPositionTargetAndUpward(vector3(0.0f, 0.0f, -15.0f), ZERO_V3, vector3(0.0f, 1.0f, 0.0f));
+			m_pCamera->SetNearFar(vector2(1.0f, 10.0f));
+			break;
+		case 6:
+			m_pCamera->ResetCamera();
+			m_pCamera->SetPositionTargetAndUpward(vector3(0.0f, 0.0f, 10.0f), ZERO_V3, vector3(0.0f, -1.0f, 0.0f));
+			break;
+		case 7:
+			m_pCamera->ResetCamera();
+			break;
+		}
 	}
+	lastProj = m_uProjection;
 
 	m_pCamera->CalculateProjectionMatrix();
 	m_pCamera->CalculateViewMatrix();

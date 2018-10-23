@@ -16,6 +16,7 @@ Date: 2017/05
 #include "ControllerConfiguration.h"
 #include "imgui\ImGuiObject.h"
 
+#include <math.h>
 class Application
 {
 	uint m_uOrbits = 0; //number of shapes starting at 3 and increasing in sides
