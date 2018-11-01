@@ -85,8 +85,59 @@ void MyRigidBody::SetModelMatrix(matrix4 a_m4ModelMatrix)
 	m_m4ToWorld = a_m4ModelMatrix;
 	
 	//your code goes here---------------------
-	m_v3MinG = m_v3MinL;
-	m_v3MaxG = m_v3MaxL;
+	static uint iMesh = m_pMeshMngr->GenerateCuboid(m_v3MaxL - m_v3MinL, C_BLACK); //make a box from the original bounding box dimensions
+
+	Mesh* bb = m_pMeshMngr->GetMesh(iMesh);
+	std::vector<vector3> vects = bb->GetVertexList();
+
+	//quaternion rot = glm::toQuat(m_m4ToWorld);
+	m_v3MaxG = ((matrix3)m_m4ToWorld * m_v3MinL);
+	m_v3MinG = ((matrix3)m_m4ToWorld * m_v3MaxL);
+	for (size_t i = 1; i < vects.size(); i++)
+	{
+		vector3 vect = (matrix3)m_m4ToWorld * vects[i];
+		if (m_v3MinG.x > vect.x)
+			m_v3MinG.x = vect.x;
+		else if (m_v3MaxG.x < vect.x)
+				m_v3MaxG.x = vect.x;
+
+		if (m_v3MinG.y > vect.y)
+			m_v3MinG.y = vect.y;
+		else if (m_v3MaxG.y < vect.y)
+			m_v3MaxG.y = vect.y;
+
+		if (m_v3MinG.z > vect.z)
+			m_v3MinG.z = vect.z;
+		else if(m_v3MaxG.z < vect.z)
+			m_v3MaxG.z = vect.z;		
+	}
+	m_v3MaxG = (matrix3)m_m4ToWorld * m_v3MaxG;
+	m_v3MinG = (matrix3)m_m4ToWorld * m_v3MinG;
+	/*vector3 v3MaxRotated = m_v3MaxL * glm::quat_cast(m_m4ToWorld);
+	vector3 v3MinRotated = m_v3MinL * glm::quat_cast(m_m4ToWorld);
+
+	//find minimums
+	m_v3MinG.x = v3MinRotated.x;
+	if (m_v3MinG.x > v3MaxRotated.x)
+		m_v3MinG.x = v3MaxRotated.x;
+	m_v3MinG.y = v3MinRotated.y;
+	if (m_v3MinG.y > v3MaxRotated.y)
+		m_v3MinG.y = v3MaxRotated.y;
+	m_v3MinG.z = v3MinRotated.z;
+	if (m_v3MinG.z > v3MaxRotated.z)
+		m_v3MinG.z = v3MaxRotated.z;
+
+	//find maximums
+	m_v3MaxG.x = v3MaxRotated.x;
+	if (m_v3MaxG.x < v3MinRotated.x)
+		m_v3MaxG.x = v3MinRotated.x;
+	m_v3MaxG.y = v3MaxRotated.y;
+	if (m_v3MaxG.y < v3MinRotated.y)
+		m_v3MaxG.y = v3MinRotated.y;
+	m_v3MaxG.z = v3MaxRotated.z;
+	if (m_v3MaxG.z < v3MinRotated.z)
+		m_v3MaxG.z = v3MinRotated.z;*/
+
 	//----------------------------------------
 
 	//we calculate the distance between min and max vectors
