@@ -25,8 +25,9 @@ class MyOctant
 	MyOctant* m_pChild[8];
 	uint m_nLevel = 0;
 	int m_iLim;
+	int m_iDim;
 public:
-	std::vector<MyRigidBody*> m_ContainedRBs;
+	std::vector<MyEntity*> m_ContainedEnts;
 	void Display(void);
 	void IsColliding(void);
 	void Subdivide();

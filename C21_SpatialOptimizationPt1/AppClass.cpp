@@ -28,12 +28,14 @@ void Application::InitVariables(void)
 		vector3 v3Position = vector3(glm::sphericalRand(34.0f));
 		matrix4 m4Position = glm::translate(v3Position);
 		m_pEntityMngr->SetModelMatrix(m4Position);
-		m_pEntityMngr->AddDimension(-1, 0);
+		
 		uIndex++;
 	
 	}
 	m_pEntityMngr->Update();
 	m_pRoot = new MyOctant(6);
+
+	
 	//m_pRoot = new MyOctant(vector3(10.0f, 10.0f, 10.0f), 50.0f);
 	//steve
 	//m_pEntityMngr->AddEntity("Minecraft\\Steve.obj", "Steve");
@@ -66,6 +68,18 @@ void Application::Display(void)
 	
 	// draw a skybox
 	m_pMeshMngr->AddSkyboxToRenderList();
+
+	//debug object rendering to try and figure out what the hell my problem is
+	/*for (size_t i = 0; i < m_pEntityMngr->GetEntityList().size(); i++)
+	{
+		m_pMeshMngr->AddMeshToRenderList(
+			m_pMeshMngr->GetMesh(
+				m_pMeshMngr->GenerateIcoSphere(1, 3)
+			),
+			m_pEntityMngr->GetEntity(i)->GetModelMatrix()
+		);
+
+	}*///this is a memory filler, only use to visualize possibly invisible objects
 	
 	//render list call
 	m_uRenderCallCount = m_pMeshMngr->Render();
