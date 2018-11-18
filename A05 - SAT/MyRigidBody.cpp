@@ -213,7 +213,7 @@ void MyRigidBody::AddCollisionWith(MyRigidBody* a_pOther)
 	auto element = m_CollidingRBSet.find(a_pOther);
 	if (element != m_CollidingRBSet.end())
 		return;
-	// we couldn't find the object so add it
+	// we couldn'v3TranslateToThis find the object so add it
 	m_CollidingRBSet.insert(a_pOther);
 }
 void MyRigidBody::RemoveCollisionWith(MyRigidBody* a_pOther)
@@ -276,17 +276,179 @@ void MyRigidBody::AddToRenderList(void)
 
 uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 {
-	/*
-	Your code goes here instead of this comment;
 
-	For this method, if there is an axis that separates the two objects
-	then the return will be different than 0; 1 for any separating axis
-	is ok if you are not going for the extra credit, if you could not
-	find a separating axis you need to return 0, there is an enum in
-	Simplex that might help you [eSATResults] feel free to use it.
-	(eSATResults::SAT_NONE has a value of 0)
-	*/
+	//data for this body
+	vector3 center = GetCenterGlobal();
+	vector3 axes[3];
+	axes[0] = m_m4ToWorld[0];
+	axes[1] = m_m4ToWorld[1];
+	axes[2] = m_m4ToWorld[2];
+	vector3 halfWidth = GetHalfWidth();
 
-	//there is no axis test that separates this two objects
+	//data for the other body
+	vector3 otherCenter = a_pOther->GetCenterGlobal();
+	vector3 otherAxes[3];
+	otherAxes[0] = a_pOther->m_m4ToWorld[0];
+	otherAxes[1] = a_pOther->m_m4ToWorld[1];
+	otherAxes[2] = a_pOther->m_m4ToWorld[2];
+	vector3 otherHalfWidth = a_pOther->GetHalfWidth();
+
+	
+	float radius, otherRadius;
+	matrix3 m4RotateToThis, m4RotateToThisNorm;
+
+	// rotation matrix expressing b in a's coordinate frame
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			m4RotateToThis[i][j] = glm::dot(axes[i], otherAxes[j]);
+
+	// Compute translation vector v3TranslateToThis
+	vector3 v3TranslateToThis = otherCenter - center;
+	// Bring translation into a's coordinate frame
+	v3TranslateToThis = vector3(
+		glm::dot(v3TranslateToThis, axes[0]), 
+		glm::dot(v3TranslateToThis, axes[1]), 
+		glm::dot(v3TranslateToThis, axes[2]));
+
+
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			m4RotateToThisNorm[i][j] = glm::abs(m4RotateToThis[i][j]) + 0.0001f;
+
+	// Test axes AX, AY, AZ
+	radius = halfWidth[0];
+	otherRadius =
+		otherHalfWidth[0] * m4RotateToThisNorm[0][0] +
+		otherHalfWidth[1] * m4RotateToThisNorm[0][1] +
+		otherHalfWidth[2] * m4RotateToThisNorm[0][2];
+
+	if (glm::abs(v3TranslateToThis[0]) > radius + otherRadius)
+		return eSATResults::SAT_AX;
+
+
+	radius = halfWidth[1];
+	otherRadius =
+		otherHalfWidth[0] * m4RotateToThisNorm[1][0] +
+		otherHalfWidth[1] * m4RotateToThisNorm[1][1] +
+		otherHalfWidth[2] * m4RotateToThisNorm[1][2];
+
+	if (glm::abs(v3TranslateToThis[1]) > radius + otherRadius)
+		return eSATResults::SAT_AY;
+
+
+	radius = halfWidth[2];
+	otherRadius =
+		otherHalfWidth[0] * m4RotateToThisNorm[2][0] +
+		otherHalfWidth[1] * m4RotateToThisNorm[2][1] +
+		otherHalfWidth[2] * m4RotateToThisNorm[2][2];
+
+	if (glm::abs(v3TranslateToThis[2]) > radius + otherRadius)
+		return eSATResults::SAT_AZ;
+
+
+	// Test axes Bx, By, Bz
+	radius = halfWidth[0] * m4RotateToThisNorm[0][0] +
+		halfWidth[1] * m4RotateToThisNorm[1][0] +
+		halfWidth[2] * m4RotateToThisNorm[2][0];
+	otherRadius = otherHalfWidth[0];
+
+	if (
+		glm::abs(v3TranslateToThis[0] * m4RotateToThis[0][0] +
+			v3TranslateToThis[1] * m4RotateToThis[1][0] +
+			v3TranslateToThis[2] * m4RotateToThis[2][0])
+	> radius + otherRadius)
+		return eSATResults::SAT_BX;
+
+
+	radius = halfWidth[0] * m4RotateToThisNorm[0][1] +
+		halfWidth[1] * m4RotateToThisNorm[1][1] +
+		halfWidth[2] * m4RotateToThisNorm[2][1];
+	otherRadius = otherHalfWidth[1];
+
+	if (
+		glm::abs(v3TranslateToThis[0] * m4RotateToThis[0][1] +
+			v3TranslateToThis[1] * m4RotateToThis[1][1] +
+			v3TranslateToThis[2] * m4RotateToThis[2][1])
+	> radius + otherRadius)
+		return eSATResults::SAT_BY;
+
+
+	radius = halfWidth[0] * m4RotateToThisNorm[0][2] +
+		halfWidth[1] * m4RotateToThisNorm[1][2] +
+		halfWidth[2] * m4RotateToThisNorm[2][2];
+	otherRadius = otherHalfWidth[2];
+
+	if (
+		glm::abs(v3TranslateToThis[0] * m4RotateToThis[0][2] +
+			v3TranslateToThis[1] * m4RotateToThis[1][2] +
+			v3TranslateToThis[2] * m4RotateToThis[2][2])
+	> radius + otherRadius)
+		return eSATResults::SAT_BZ;
+	
+
+	// Test axis AX x BX
+	radius = halfWidth[1] * m4RotateToThisNorm[2][0] + halfWidth[2] * m4RotateToThisNorm[1][0];
+	otherRadius = otherHalfWidth[1] * m4RotateToThisNorm[0][2] + otherHalfWidth[2] * m4RotateToThisNorm[0][1];
+
+	if (glm::abs(v3TranslateToThis[2] * m4RotateToThis[1][0] - v3TranslateToThis[1] * m4RotateToThis[2][0]) > radius + otherRadius)
+		return eSATResults::SAT_AXxBX;
+
+	// Test axis AX x BY
+	radius = halfWidth[1] * m4RotateToThisNorm[2][1] + halfWidth[2] * m4RotateToThisNorm[1][1];
+	otherRadius = otherHalfWidth[0] * m4RotateToThisNorm[0][2] + otherHalfWidth[2] * m4RotateToThisNorm[0][0];
+
+	if (glm::abs(v3TranslateToThis[2] * m4RotateToThis[1][1] - v3TranslateToThis[1] * m4RotateToThis[2][1]) > radius + otherRadius)
+		return eSATResults::SAT_AXxBY;
+
+	// Test axis AX x BZ
+	radius = halfWidth[1] * m4RotateToThisNorm[2][2] + halfWidth[2] * m4RotateToThisNorm[1][2];
+	otherRadius = otherHalfWidth[0] * m4RotateToThisNorm[0][1] + otherHalfWidth[1] * m4RotateToThisNorm[0][0];
+
+	if (glm::abs(v3TranslateToThis[2] * m4RotateToThis[1][2] - v3TranslateToThis[1] * m4RotateToThis[2][2]) > radius + otherRadius)
+		return eSATResults::SAT_AXxBZ;
+
+	// Test axis AY x BX
+	radius = halfWidth[0] * m4RotateToThisNorm[2][0] + halfWidth[2] * m4RotateToThisNorm[0][0];
+	otherRadius = otherHalfWidth[1] * m4RotateToThisNorm[1][2] + otherHalfWidth[2] * m4RotateToThisNorm[1][1];
+
+	if (glm::abs(v3TranslateToThis[0] * m4RotateToThis[2][0] - v3TranslateToThis[2] * m4RotateToThis[0][0]) > radius + otherRadius)
+		return eSATResults::SAT_AYxBX;
+
+	// Test axis AY x BY
+	radius = halfWidth[0] * m4RotateToThisNorm[2][1] + halfWidth[2] * m4RotateToThisNorm[0][1];
+	otherRadius = otherHalfWidth[0] * m4RotateToThisNorm[1][2] + otherHalfWidth[2] * m4RotateToThisNorm[1][0];
+
+	if (glm::abs(v3TranslateToThis[0] * m4RotateToThis[2][1] - v3TranslateToThis[2] * m4RotateToThis[0][1]) > radius + otherRadius)
+		return eSATResults::SAT_AYxBY;
+
+	// Test axis AY x BZ
+	radius = halfWidth[0] * m4RotateToThisNorm[2][2] + halfWidth[2] * m4RotateToThisNorm[0][2];
+	otherRadius = otherHalfWidth[0] * m4RotateToThisNorm[1][1] + otherHalfWidth[1] * m4RotateToThisNorm[1][0];
+
+	if (glm::abs(v3TranslateToThis[0] * m4RotateToThis[2][2] - v3TranslateToThis[2] * m4RotateToThis[0][2]) > radius + otherRadius)
+		return eSATResults::SAT_AYxBZ;
+
+	// Test axis AZ x BX
+	radius = halfWidth[0] * m4RotateToThisNorm[1][0] + halfWidth[1] * m4RotateToThisNorm[0][0];
+	otherRadius = otherHalfWidth[1] * m4RotateToThisNorm[2][2] + otherHalfWidth[2] * m4RotateToThisNorm[2][1];
+
+	if (glm::abs(v3TranslateToThis[1] * m4RotateToThis[0][0] - v3TranslateToThis[0] * m4RotateToThis[1][0]) > radius + otherRadius)
+		return eSATResults::SAT_AZxBX;
+
+	// Test axis AZ x BY
+	radius = halfWidth[0] * m4RotateToThisNorm[1][1] + halfWidth[1] * m4RotateToThisNorm[0][1];
+	otherRadius = otherHalfWidth[0] * m4RotateToThisNorm[2][2] + otherHalfWidth[2] * m4RotateToThisNorm[2][0];
+
+	if (glm::abs(v3TranslateToThis[1] * m4RotateToThis[0][1] - v3TranslateToThis[0] * m4RotateToThis[1][1]) > radius + otherRadius)
+		return eSATResults::SAT_AZxBY;
+
+	// Test axis AZ x BZ
+	radius = halfWidth[0] * m4RotateToThisNorm[1][2] + halfWidth[1] * m4RotateToThisNorm[0][2];
+	otherRadius = otherHalfWidth[0] * m4RotateToThisNorm[2][1] + otherHalfWidth[1] * m4RotateToThisNorm[2][0];
+
+	if (glm::abs(v3TranslateToThis[1] * m4RotateToThis[0][2] - v3TranslateToThis[0] * m4RotateToThis[1][2]) > radius + otherRadius)
+		return eSATResults::SAT_AZxBZ;
+
+	//there is no axis test that separates these two objects
 	return eSATResults::SAT_NONE;
 }
